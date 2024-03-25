@@ -26,7 +26,7 @@ export const updateQTable = (
 };
 
 export const chooseAction = (state: string) => {
-  const epsilon = 0.1;
+  const epsilon = 0.5;
   const random = chooseRandom(state);
 
   if (Math.random() < epsilon) {
