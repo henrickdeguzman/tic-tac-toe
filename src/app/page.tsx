@@ -14,6 +14,7 @@ import {
 export default function Home() {
   const [isXNext, setIsXNext] = useState(true);
   const [squares, setSquares] = useState(Array(9).fill(null));
+  let i = 0;
 
   const handleNextState = useCallback(
     (value: number) => {
@@ -55,15 +56,16 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const gameOver = calculateGameOver(squares);
+    const winner = calculateWinner(squares);
+    const moves = squares.filter((square) => square === "O").length;
+    let reward = gameOver ? 5 : 10 - moves * 2;
+    if (winner !== null) {
+      reward += winner === "O" ? 15 : -30;
+    }
+
     // AI is O
     if (!isXNext) {
-      const gameOver = calculateGameOver(squares);
-      const winner = calculateWinner(squares);
-      let reward = gameOver ? 2 : 0;
-      if (winner !== null) {
-        reward = winner === "O" ? 10 : -10;
-      }
-
       const choosenAction = chooseAction(squares.toString());
       updateQTable(
         squares.toString(),
@@ -74,19 +76,29 @@ export default function Home() {
 
       handleClick(choosenAction);
     }
+
     // This is for training the AI
-    // let i = 0;
-    // if (i % 1000000 === 0) {
-    //   logQTable();
-    // }
-    // if (isXNext) {
-    //   handleClick(chooseRandom(squares.toString()));
-    // }
-    // if (calculateGameOver(squares)) {
-    //   handleReset();
-    // }
-    // i++;
-  }, [handleClick, handleNextState, isXNext, squares]);
+    const shouldTrain = false;
+    if (shouldTrain) {
+      if (i % 1000000 === 0) {
+        logQTable();
+      }
+      if (isXNext) {
+        const choosenRandom = chooseRandom(squares.toString());
+        updateQTable(
+          squares.toString(),
+          choosenRandom,
+          reward,
+          handleNextState(choosenRandom).toString()
+        );
+        handleClick(choosenRandom);
+      }
+      if (calculateGameOver(squares)) {
+        handleReset();
+      }
+      i++;
+    }
+  }, [handleClick, handleNextState, i, isXNext, squares]);
 
   return (
     <div className="p-8">
